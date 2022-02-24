@@ -22,3 +22,7 @@ export const DogImage = styled.img`
 width: 100%;
 height: 83%;
 `;
+
+export const Button = styled.button`
+
+`

@@ -4,17 +4,24 @@ import Link from "next/link";
 import { DogCard, DogImage, DogName } from "../styles/DogCard";
 import theme from "../styles/theme";
 import { FETCH_BREEDS } from "../helpers/constants";
-
-interface Dog {
-  breed: string;
-  picture: string;
-  subBreeds: string;
-}
+import { useEffect, useState } from "react";
+import { Dog } from "../types";
 
 const Home: NextPage = ({ data }: any) => {
+  const [ fetchedDogs, setFetchedDogs ] = useState<Dog[]>([]);
+
+  useEffect(() => {
+    if(data){
+    setFetchedDogs(data);
+  }}, []);
+
+  if(!fetchedDogs) {
+    return <> There are no dogs </>
+  }
+
   return (
     <Layout>
-      {data.map((dog: Dog) => {
+      {fetchedDogs.map((dog: Dog) => {
         return (
           <div key={dog.breed}>
             <Link href={`/subreeds/${dog.breed}`}>

@@ -1,7 +1,9 @@
 export interface Dog {
+    id : string;
     breed: string;
     picture: string;
     subBreeds: string;
+    liked: boolean;
 }
 
 
