@@ -9,15 +9,16 @@ import { Dog } from "../types";
 
 export default function FavSubBreed() {
   const [favouritePic, setfavouritePic] = useState([]);
+  const [selectedOption, setSelectedOption] = useState("All Breeds");
+  const [filteredOptions, setFilteredOptions] = useState([]);
+
   const [isOpen, setIsOpen] = useState(false);
   const toggling = () => setIsOpen(!isOpen);
-
-  const [selectedOption, setSelectedOption] = useState("All Breeds");
 
   // Check if the favPic exists.
   useEffect(() => {
     const favouriteDogs = localStorage.getItem("favPic");
-    const savedDogs = JSON.parse(favouriteDogs);
+    const savedDogs = JSON.parse(favouriteDogs || "null");
     if (savedDogs) {
       setfavouritePic(savedDogs);
     }
@@ -31,7 +32,7 @@ export default function FavSubBreed() {
   // Retreive all the names of the dogs that have been liked from the storage.
   const getBreedNames = () => {
     const breedNames = ["All Breeds"];
-    favouritePic.map((name) => {
+    favouritePic.map((name: any) => {
       const dogName = name.picture.split("/")[4];
       if (breedNames.indexOf(dogName) === -1) breedNames.push(dogName);
     });
@@ -44,7 +45,35 @@ export default function FavSubBreed() {
   const onOptionClicked = (value: string) => () => {
     setSelectedOption(value);
     setIsOpen(false);
-    console.log(selectedOption);
+    const filteredPictures = favouritePic.filter((el: any) => el.picture.indexOf(value) >= 0);
+
+    setFilteredOptions(value === "All Breeds" ? favouritePic : filteredPictures);
+  };
+
+  const render = () => {
+    if (selectedOption === "All Breeds") {
+      return favouritePic.map((subBreedName: Dog) => {
+        return (
+          <div key={subBreedName.id}>
+            <DogCard>
+              <DogImage src={subBreedName.picture} />
+              <DogName theme={theme}>{getSubBreedName(subBreedName.picture)}</DogName>
+            </DogCard>
+          </div>
+        );
+      });
+    } else {
+      return filteredOptions.map((subBreedName: Dog) => {
+        return (
+          <div key={subBreedName.id}>
+            <DogCard>
+              <DogImage src={subBreedName.picture} />
+              <DogName theme={theme}>{getSubBreedName(subBreedName.picture)}</DogName>
+            </DogCard>
+          </div>
+        );
+      });
+    }
   };
 
   return (
@@ -58,7 +87,12 @@ export default function FavSubBreed() {
               <DropDownListContainer>
                 <DropDownList>
                   {getName.map((name: any) => {
-                    return <ListItem onClick={onOptionClicked(name)} key={v4()}> {name} </ListItem>;
+                    return (
+                      <ListItem onClick={onOptionClicked(name)} key={v4()}>
+                        {" "}
+                        {name}{" "}
+                      </ListItem>
+                    );
                   })}
                 </DropDownList>
               </DropDownListContainer>
@@ -66,7 +100,8 @@ export default function FavSubBreed() {
           </DropDownContainer>
         </FilterContainer>
         <DogContainer>
-          {favouritePic.map((subBreedName: Dog) => {
+          {render()}
+          {/* {filteredOptions.map((subBreedName: Dog) => {
             return (
               <div key={subBreedName.id}>
                 <DogCard>
@@ -75,7 +110,7 @@ export default function FavSubBreed() {
                 </DogCard>
               </div>
             );
-          })}
+          })} */}
         </DogContainer>
       </FavouriteContainer>
     </Layout>
