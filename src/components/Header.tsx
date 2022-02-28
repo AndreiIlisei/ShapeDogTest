@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = () => {
         </Link>
 
         <Link href="/favourite">
-          <NavElement> Favourite Images </NavElement>
+          <NavElement> Favourite Dogs </NavElement>
         </Link>
       </Container>
     </HeaderElement>
