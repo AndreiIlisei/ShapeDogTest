@@ -1,19 +1,23 @@
-import { GetStaticProps } from "next/types";
 import { useEffect, useState } from "react";
 import { v4 } from "uuid";
-import RedHeart from "../../helpers/redHeart";
-import GreyHeart from "../../helpers/greyHeart";
 import Layout from "../../components/Layout";
-
+import Heart from "../../helpers/redHeart";
 import { Button, DogCard, DogImage, DogName } from "../../styles/DogCard";
 import theme from "../../styles/theme";
-import { Dog } from "../../types";
+import { Dog, DogsProps, SlugParams } from "../../types";
 
-export default function DogPage({ dogs }: any) {
+export default function DogPage({ dogs }: DogsProps) {
   const [subBreeds, setSubBreeds] = useState<Dog[]>([]);
+  const [updateDogs, setUpdatedDogs] = useState(false);
 
   useEffect(() => {
-    if (subBreeds.length > 0) {
+    if (dogs) {
+      setSubBreeds(dogs);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (subBreeds.length > 0 && !updateDogs) {
       const storageDogs = JSON.parse(localStorage.getItem("favPic") || "null");
 
       if (storageDogs) {
@@ -26,20 +30,16 @@ export default function DogPage({ dogs }: any) {
             newDog.liked = true;
           }
         });
-
         setSubBreeds(newDogs);
+        setUpdatedDogs(true);
       }
     }
   }, [subBreeds]);
 
-  useEffect(() => {
-    if (dogs) {
-      setSubBreeds(dogs);
-    }
-  }, []);
-
   const updateLocalStorage = (item: Dog) => {
-    const storageFavPics: Dog[] = JSON.parse(localStorage.getItem("favPic") || "null");
+    const storageFavPics: Dog[] = JSON.parse(
+      localStorage.getItem("favPic") || "null"
+    );
     let updatedStorageFavPics;
 
     if (storageFavPics === null) {
@@ -47,10 +47,14 @@ export default function DogPage({ dogs }: any) {
       localStorage.setItem("favPic", JSON.stringify(favDogs));
     } else {
       if (item.liked) {
-        const shouldAddDog = storageFavPics.findIndex((dog) => dog.picture === item.picture) === -1;
+        const shouldAddDog =
+          storageFavPics.findIndex((dog) => dog.picture === item.picture) ===
+          -1;
         if (shouldAddDog) updatedStorageFavPics = [...storageFavPics, item];
       } else {
-        const filteredPictures = storageFavPics.filter((dog) => dog.picture !== item.picture);
+        const filteredPictures = storageFavPics.filter(
+          (dog) => dog.picture !== item.picture
+        );
         updatedStorageFavPics = [...filteredPictures];
       }
 
@@ -63,7 +67,9 @@ export default function DogPage({ dogs }: any) {
   const setFavouriteImage = (picture: string) => {
     if (subBreeds) {
       const newSubBreeds = [...subBreeds];
-      const getSubBreedPicture = newSubBreeds.find((subBreedName) => subBreedName.picture === picture);
+      const getSubBreedPicture = newSubBreeds.find(
+        (subBreedName) => subBreedName.picture === picture
+      );
       console.log(newSubBreeds);
       if (getSubBreedPicture) {
         getSubBreedPicture.liked = !getSubBreedPicture.liked;
@@ -85,7 +91,9 @@ export default function DogPage({ dogs }: any) {
             <DogImage src={subBreedName.picture} />
             <DogName theme={theme}>
               {getSubBreedName(subBreedName.picture)}
-              <Button onClick={() => setFavouriteImage(subBreedName.picture)}>{subBreedName.liked ? <RedHeart /> : <GreyHeart />}</Button>
+              <Button onClick={() => setFavouriteImage(subBreedName.picture)}>
+                <Heart isLiked={subBreedName.liked} />
+              </Button>
             </DogName>
           </DogCard>
         </div>
@@ -108,12 +116,12 @@ export async function getStaticPaths() {
   };
 }
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const { dogName }: any = params;
+export const getStaticProps = async ({ params }: SlugParams) => {
+  const { dogName } = params;
   const res = await fetch(`https://dog.ceo/api/breed/${dogName}/images`);
   const data = await res.json();
 
-  const dogs = data.message.map((items: Dog) => {
+  const dogs: Dog = data.message.map((items: Dog) => {
     return { picture: items, liked: false, id: v4() };
   });
 

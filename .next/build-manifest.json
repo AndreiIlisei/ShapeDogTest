@@ -34,11 +34,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/favourite.js"
-    ],
-    "/subreeds/[dogName]": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/subreeds/[dogName].js"
     ]
   },
   "ampFirstPages": []

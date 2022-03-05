@@ -2,10 +2,20 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { v4 } from "uuid";
 import Layout from "../components/Layout";
-import { DogContainer, DropDownContainer, DropDownHeader, DropDownList, DropDownListContainer, FavouriteContainer, FilterContainer, FilterText, ListItem } from "../styles/Container";
+import {
+  DogContainer,
+  DropDownContainer,
+  DropDownHeader,
+  DropDownList,
+  DropDownListContainer,
+  FavouriteContainer,
+  FilterContainer,
+  FilterText,
+  ListItem,
+} from "../styles/Container";
 import { DogCard, DogImage, DogName } from "../styles/DogCard";
 import theme from "../styles/theme";
-import { Dog } from "../types";
+import { Dog, PropForFavourite } from "../types";
 
 export default function FavSubBreed() {
   const [favouritePic, setfavouritePic] = useState([]);
@@ -21,6 +31,7 @@ export default function FavSubBreed() {
     const savedDogs = JSON.parse(favouriteDogs || "null");
     if (savedDogs) {
       setfavouritePic(savedDogs);
+      setFilteredOptions(savedDogs);
     }
   }, []);
 
@@ -32,7 +43,7 @@ export default function FavSubBreed() {
   // Retreive all the names of the dogs that have been liked from the storage.
   const getBreedNames = () => {
     const breedNames = ["All Breeds"];
-    favouritePic.map((name: any) => {
+    favouritePic.map((name: PropForFavourite) => {
       const dogName = name.picture.split("/")[4];
       if (breedNames.indexOf(dogName) === -1) breedNames.push(dogName);
     });
@@ -45,35 +56,13 @@ export default function FavSubBreed() {
   const onOptionClicked = (value: string) => () => {
     setSelectedOption(value);
     setIsOpen(false);
-    const filteredPictures = favouritePic.filter((el: any) => el.picture.indexOf(value) >= 0);
+    const filteredPictures = favouritePic.filter(
+      (el: PropForFavourite) => el.picture.indexOf(value) >= 0
+    );
 
-    setFilteredOptions(value === "All Breeds" ? favouritePic : filteredPictures);
-  };
-
-  const render = () => {
-    if (selectedOption === "All Breeds") {
-      return favouritePic.map((subBreedName: Dog) => {
-        return (
-          <div key={subBreedName.id}>
-            <DogCard>
-              <DogImage src={subBreedName.picture} />
-              <DogName theme={theme}>{getSubBreedName(subBreedName.picture)}</DogName>
-            </DogCard>
-          </div>
-        );
-      });
-    } else {
-      return filteredOptions.map((subBreedName: Dog) => {
-        return (
-          <div key={subBreedName.id}>
-            <DogCard>
-              <DogImage src={subBreedName.picture} />
-              <DogName theme={theme}>{getSubBreedName(subBreedName.picture)}</DogName>
-            </DogCard>
-          </div>
-        );
-      });
-    }
+    setFilteredOptions(
+      value === "All Breeds" ? favouritePic : filteredPictures
+    );
   };
 
   return (
@@ -86,11 +75,10 @@ export default function FavSubBreed() {
             {isOpen && (
               <DropDownListContainer>
                 <DropDownList>
-                  {getName.map((name: any) => {
+                  {getName.map((name: string) => {
                     return (
                       <ListItem onClick={onOptionClicked(name)} key={v4()}>
-                        {" "}
-                        {name}{" "}
+                        {name}
                       </ListItem>
                     );
                   })}
@@ -100,17 +88,18 @@ export default function FavSubBreed() {
           </DropDownContainer>
         </FilterContainer>
         <DogContainer>
-          {render()}
-          {/* {filteredOptions.map((subBreedName: Dog) => {
+          {filteredOptions.map((subBreedName: Dog) => {
             return (
               <div key={subBreedName.id}>
                 <DogCard>
                   <DogImage src={subBreedName.picture} />
-                  <DogName theme={theme}>{getSubBreedName(subBreedName.picture)}</DogName>
+                  <DogName theme={theme}>
+                    {getSubBreedName(subBreedName.picture)}
+                  </DogName>
                 </DogCard>
               </div>
             );
-          })} */}
+          })}
         </DogContainer>
       </FavouriteContainer>
     </Layout>

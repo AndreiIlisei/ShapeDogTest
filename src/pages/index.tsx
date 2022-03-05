@@ -1,22 +1,23 @@
 import type { GetStaticProps, NextPage } from "next";
-import Layout from "../components/Layout";
 import Link from "next/link";
+import { Props, ReactNode, useEffect, useState } from "react";
+import Layout from "../components/Layout";
+import { FETCH_BREEDS } from "../helpers/constants";
 import { DogCard, DogImage, DogName } from "../styles/DogCard";
 import theme from "../styles/theme";
-import { FETCH_BREEDS } from "../helpers/constants";
-import { useEffect, useState } from "react";
-import { Dog } from "../types";
+import { Dog, DogsNew } from "../types";
 
-const Home: NextPage = ({ data }: any) => {
-  const [ fetchedDogs, setFetchedDogs ] = useState<Dog[]>([]);
+const Home: NextPage<DogsNew> = ({ data }: DogsNew) => {
+  const [fetchedDogs, setFetchedDogs] = useState<Dog[]>([]);
 
   useEffect(() => {
-    if(data){
-    setFetchedDogs(data);
-  }}, []);
+    if (data) {
+      setFetchedDogs(data);
+    }
+  }, []);
 
-  if(!fetchedDogs) {
-    return <> There are no dogs </>
+  if (!fetchedDogs) {
+    return <> There are no dogs </>;
   }
 
   return (
@@ -43,10 +44,16 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const dogPictureData = await Promise.all(
     Object.keys(data.message).map(async (item) => {
-      const res = await fetch(`https://dog.ceo/api/breed/${item}/images/random`);
+      const res = await fetch(
+        `https://dog.ceo/api/breed/${item}/images/random`
+      );
       const pictureData = await res.json();
 
-      return { breed: item, picture: pictureData.message, subBreeds: data.message[item] };
+      return {
+        breed: item,
+        picture: pictureData.message,
+        subBreeds: data.message[item],
+      };
     })
   );
 
